@@ -1,0 +1,101 @@
+# import libraries
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier, IsolationForest
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score
+import warnings
+warnings.filterwarnings("ignore")
+
+# Load and preprocess data
+df = pd.read_csv("/content/creditcard_2023.csv")
+df.drop(columns="id", inplace=True)
+
+# Data overview
+print(df.info())
+print(df.describe())
+
+# Visualization
+sns.countplot(data=df, x="Class")
+plt.show()
+
+# Correlation matrix
+plt.figure(figsize=(15, 10))
+corr = df.corr()
+sns.heatmap(corr, annot=True, fmt=".2f")
+plt.show()
+
+# Split data into features and target
+X = df.drop(columns="Class")
+y = df["Class"]
+
+# Split into training and testing set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Random Forest Classifier
+# Drop rows with any missing values in X_test
+X_test = X_test.dropna()
+clf_rf = RandomForestClassifier(n_jobs=-1)
+clf_rf.fit(X_train, y_train)
+y_pred_rf = clf_rf.predict(X_test)
+
+# Random Forest Classifier
+clf_rf = RandomForestClassifier(n_jobs=-1)
+clf_rf.fit(X_train, y_train)
+# Predict on the original X_test (before dropping rows)
+y_pred_rf = clf_rf.predict(X_test)
+
+# Random Forest evaluation
+# Drop the corresponding rows from y_test to match X_test
+y_test_dropped = y_test[X_test.index]
+print("Random Forest Accuracy: ", accuracy_score(y_test_dropped, y_pred_rf) * 100)
+print("Random Forest Precision: ", precision_score(y_test_dropped, y_pred_rf))
+print("Random Forest Recall: ", recall_score(y_test_dropped, y_pred_rf))
+print("Random Forest F1-Score: ", f1_score(y_test_dropped, y_pred_rf))
+cm_rf = confusion_matrix(y_test_dropped, y_pred_rf)
+sns.heatmap(cm_rf, annot=True, fmt="d")
+plt.title("Random Forest Confusion Matrix")
+plt.show()
+
+# Isolation Forest
+clf_if = IsolationForest(contamination=0.1, random_state=42)
+y_pred_if = clf_if.fit_predict(X_test)
+y_pred_if = [1 if pred == -1 else 0 for pred in y_pred_if]
+
+# Local Outlier Factor
+clf_lof = LocalOutlierFactor(contamination=0.1)
+y_pred_lof = clf_lof.fit_predict(X_test)
+y_pred_lof = [1 if pred == -1 else 0 for pred in y_pred_lof]
+
+# Isolation Forest evaluation
+# Subset y_test to match the rows used in X_test for Isolation Forest
+y_test_subset = y_test[X_test.index]
+print("Isolation Forest Accuracy: ", accuracy_score(y_test_subset, y_pred_if) * 100)
+print("Isolation Forest Precision: ", precision_score(y_test_subset, y_pred_if))
+print("Isolation Forest Recall: ", recall_score(y_test_subset, y_pred_if))
+print("Isolation Forest F1-Score: ", f1_score(y_test_subset, y_pred_if))
+cm_if = confusion_matrix(y_test_subset, y_pred_if)
+sns.heatmap(cm_if, annot=True, fmt="d")
+plt.title("Isolation Forest Confusion Matrix")
+plt.show()
+
+# Local Outlier Factor evaluation
+# Local Outlier Factor
+clf_lof = LocalOutlierFactor(contamination=0.1)
+y_pred_lof = clf_lof.fit_predict(X_test)
+y_pred_lof = [1 if pred == -1 else 0 for pred in y_pred_lof]
+
+# Subset y_test to match the rows used in X_test for Local Outlier Factor
+y_test_subset = y_test[X_test.index]
+
+print("Local Outlier Factor Accuracy: ", accuracy_score(y_test_subset, y_pred_lof) * 100) # Change y_test to y_test_subset
+print("Local Outlier Factor Precision: ", precision_score(y_test_subset, y_pred_lof)) # Change y_test to y_test_subset
+print("Local Outlier Factor Recall: ", recall_score(y_test_subset, y_pred_lof)) # Change y_test to y_test_subset
+print("Local Outlier Factor F1-Score: ", f1_score(y_test_subset, y_pred_lof)) # Change y_test to y_test_subset
+cm_lof = confusion_matrix(y_test_subset, y_pred_lof) # Change y_test to y_test_subset
+sns.heatmap(cm_lof, annot=True, fmt="d")
+plt.title("Local Outlier Factor Confusion Matrix")
+plt.show()
