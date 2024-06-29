@@ -1,8 +1,13 @@
 Name: DEBASISH POHI
+
 Company: CODTECH IT SOLUTIONS
+
 ID: CT6WDS227
+
 Domain: Data Analytics
+
 Duration: Jun to July 2024
+
 Mentor: G.SRAVANI
 
 Project Report: Fraud Detection System
